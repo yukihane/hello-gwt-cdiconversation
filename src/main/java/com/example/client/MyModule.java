@@ -1,10 +1,15 @@
 package com.example.client;
 
+import static com.example.shared.Constants.CID_HEADER;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.RpcRequestBuilder;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -29,7 +34,7 @@ public class MyModule implements EntryPoint {
      * Create a remote service proxy to talk to the server-side Greeting
      * service.
      */
-    private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
+    private final GreetingServiceAsync greetingService;
 
     private final Messages messages = GWT.create(Messages.class);
 
@@ -38,6 +43,21 @@ public class MyModule implements EntryPoint {
     private DialogBox dialogBox;
     private Button closeButton;
     private HTML serverResponseLabel;
+
+    public MyModule() {
+        RpcRequestBuilder builder = new RpcRequestBuilder() {
+            @Override
+            protected void doFinish(RequestBuilder rb) {
+                super.doFinish(rb);
+                if (cid != null && !cid.isEmpty()) {
+                    rb.setHeader(CID_HEADER, cid);
+                }
+            }
+        };
+
+        greetingService = GWT.create(GreetingService.class);
+        ((ServiceDefTarget) greetingService).setRpcRequestBuilder(builder);
+    }
 
     /**
      * This is the entry point method.
@@ -97,6 +117,7 @@ public class MyModule implements EntryPoint {
         startButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                cid = null;
                 greetingService.startConversation(new AsyncCallback <String>() {
 
                     @Override
