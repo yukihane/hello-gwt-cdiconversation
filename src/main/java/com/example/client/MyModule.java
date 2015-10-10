@@ -2,6 +2,7 @@ package com.example.client;
 
 import static com.example.shared.Constants.CID_HEADER;
 
+import com.example.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -138,7 +139,13 @@ public class MyModule implements EntryPoint {
             @Override
             public void onClick(ClickEvent event) {
                 String text = numberField.getText();
-                int num = Integer.valueOf(text).intValue();
+
+                if (!FieldVerifier.isValid(text)) {
+                    errorLabel.setText("Please enter numeric character(s).");
+                    return;
+                }
+
+                int num = Integer.parseInt(text);
                 greetingService.continueConversation(num, new AsyncCallback <Integer>() {
                     @Override
                     public void onSuccess(Integer result) {
